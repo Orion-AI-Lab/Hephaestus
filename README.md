@@ -47,3 +47,33 @@ Each labeled InSAR is accompanied by a json file containing the annotation detai
   "caption": "Turbulent mixing effect or wave-like patterns caused by liquid and solid particles of the atmosphere can be detected around the area. No deformation activity can be detected."
 }
 ```
+
+### Annotation Processing
+
+All the necessary utilities are contained in annotation_utils. One can directy load the annotation file or the segmentation mask(s) of the desired interferogram.
+
+#### Segmentation mask example:
+
+```
+from annotation_utils import *
+
+annotation = 'annotations/10478.json'
+get_segmentation(annotation,verbose=True)
+
+```
+
+#### Reproduce cropped patches
+
+If needed one can reproduce the cropped patches with the desired resolution using the save_crops utility.
+```
+save_crops(annotation_folder='YOUR_ANNOTATION_FOLDER/',save_path = 'OUTPUT_PATH',mask_path='PATH_TO_SAVE_MASKS')
+```
+
+The functions 
+`crop_around_object(annotation_path,verbose=True,output_size=224,index=0)` and `image_tiling(image,tile_size=224)` handle the cropping of the interferograms. When the InSAR of interest contains ground deformation the function `crop_around_object` is called, otherwise the InSAR is split in non-overlapping patches with `image_tiling`. 
+
+`crop_around_object` makes sure to include the deformation pattern in a random crop at the desired resolution without excluding the presence of multiple ground deformation types in the cropped patch.
+
+
+
+
