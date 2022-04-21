@@ -1,8 +1,26 @@
 # Hephaestus Dataset
+
 Work in progress.
 
-## Dataset Description
-A detailed description of the dataset can be seen in the original [Hephaestus](arxivlink) paper.
+This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://arxiv.org/abs/2204.09435)
+
+If you use this work, please cite:
+```
+@misc{https://doi.org/10.48550/arxiv.2204.09435,
+  doi = {10.48550/ARXIV.2204.09435},
+  url = {https://arxiv.org/abs/2204.09435}, 
+  author = {Bountos, Nikolaos Ioannis and Papoutsis, Ioannis and Michail, Dimitrios and Karavias, Andreas and Elias, Panagiotis and Parcharidis, Isaak}  
+  keywords = {Computer Vision and Pattern Recognition (cs.CV), Instrumentation and Methods for Astrophysics (astro-ph.IM), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences},
+  title = {Hephaestus: A large scale multitask dataset towards InSAR understanding},
+  publisher = {arXiv}, 
+  year = {2022}, 
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+```
+
+
+### Dataset and pretrained models
 
 The raw InSAR data can be found [here](dropboxlink).
 
@@ -13,6 +31,17 @@ The dataset is organized in the following structure:
 |    |    |---  Dates (e.g 20181128_20181204)
 |    |    |    |--- InSAR.png
 |    |    |    |--- Coherence.png
+```
+
+The cropped 224x224 patches, along with the respective masks and labels can be found [here](dropboxlink2).
+
+The directory structure for the cropped patches is:
+
+```
+|-- Root directory
+|   |-- Class labels per patch id
+|   |-- Masks
+|   |-- Cropped patches
 ```
 
 ### Annotation
