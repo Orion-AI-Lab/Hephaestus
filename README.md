@@ -33,7 +33,7 @@ The dataset is organized in the following structure:
 |    |    |    |--- Coherence.png
 ```
 
-The cropped 224x224 patches, along with the respective masks and labels can be found [here](dropboxlink2).
+The cropped 224x224 patches, along with the respective masks and labels can be found [here](https://www.dropbox.com/s/2bkpj79jepk0vks/Hephaestus_Classification.zip?dl=0).
 
 The directory structure for the cropped patches is:
 
