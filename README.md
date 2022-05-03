@@ -22,6 +22,8 @@ If you use this work, please cite:
 
 ### Dataset and pretrained models
 
+The annotation files can be downloaded [here](https://www.dropbox.com/s/w7vse4elqu0rfen/Hephaestus_Annotations.zip?dl=0).
+
 The raw InSAR data can be found [here](dropboxlink).
 
 The dataset is organized in the following structure:
