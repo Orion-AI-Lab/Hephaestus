@@ -88,16 +88,25 @@ All the necessary utilities are contained in annotation_utils. One can directy l
 ```
 from annotation_utils import *
 
-annotation = 'annotations/10478.json'
+root_path = 'Your Root Path/'
+annotation = root_path + 'annotations/10478.json'
 get_segmentation(annotation,verbose=True)
 
 ```
 
 #### Reproduce cropped patches
 
-If needed one can reproduce the cropped patches with the desired resolution using the save_crops utility.
+If needed one can reproduce the cropped patches with the desired resolution using the save_crops utility. 
+Example usage:
 ```
-save_crops(annotation_folder='YOUR_ANNOTATION_FOLDER/',save_path = 'OUTPUT_PATH',mask_path='PATH_TO_SAVE_MASKS')
+from annotation_utils import *
+
+root_path = 'Your Root Path/'
+mask_path = root_path + 'Hephaestus/masks/'
+save_path = root_path + 'Hephaestus/labeled/'
+raw_insar_path = root_path + 'Hephaestus_Raw/'
+annotation_folder = root_path + 'annotations/'
+save_crops(annotation_folder=annotation_folder,save_path=save_path,mask_path=mask_path,raw_insar_path=raw_insar_path,verbose=False)
 ```
 
 The functions 
