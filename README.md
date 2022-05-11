@@ -1,8 +1,28 @@
 # Hephaestus Dataset
+
 Work in progress.
 
-## Dataset Description
-A detailed description of the dataset can be seen in the original [Hephaestus](arxivlink) paper.
+This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://arxiv.org/abs/2204.09435)
+
+If you use this work, please cite:
+```
+@misc{https://doi.org/10.48550/arxiv.2204.09435,
+  doi = {10.48550/ARXIV.2204.09435},
+  url = {https://arxiv.org/abs/2204.09435}, 
+  author = {Bountos, Nikolaos Ioannis and Papoutsis, Ioannis and Michail, Dimitrios and Karavias, Andreas and Elias, Panagiotis and Parcharidis, Isaak}  
+  keywords = {Computer Vision and Pattern Recognition (cs.CV), Instrumentation and Methods for Astrophysics (astro-ph.IM), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences},
+  title = {Hephaestus: A large scale multitask dataset towards InSAR understanding},
+  publisher = {arXiv}, 
+  year = {2022}, 
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+```
+
+
+### Dataset and pretrained models
+
+The annotation files can be downloaded [here](https://www.dropbox.com/s/i08mz5514gczksz/annotations_hephaestus.zip?dl=0).
 
 The raw InSAR data can be found [here](dropboxlink).
 
@@ -13,6 +33,17 @@ The dataset is organized in the following structure:
 |    |    |---  Dates (e.g 20181128_20181204)
 |    |    |    |--- InSAR.png
 |    |    |    |--- Coherence.png
+```
+
+The cropped 224x224 patches, along with the respective masks and labels can be found [here](https://www.dropbox.com/s/2bkpj79jepk0vks/Hephaestus_Classification.zip?dl=0).
+
+The directory structure for the cropped patches is:
+
+```
+|-- Root directory
+|   |-- Class labels per patch id
+|   |-- Masks
+|   |-- Cropped patches
 ```
 
 ### Annotation
@@ -39,7 +70,7 @@ Each labeled InSAR is accompanied by a json file containing the annotation detai
     "Non_Deformation" #Labels. May contain multiple elements.
   ],
   "activity_type": [], #Activity type of each ground deformation pattern.
-  "intensity_level": "None", #Intensity of the event.
+  "intensity_level": ["None"], #Intensity level of each activity type.
   "phase": "Rest", #Phase of the volcano. Rest/Unrest/Rebound.
   "confidence": 0.8, #Confidence of the annotator for this annotation.
   "segmentation_mask": [], #List of polygons containing the ground deformation patterns.
@@ -47,3 +78,33 @@ Each labeled InSAR is accompanied by a json file containing the annotation detai
   "caption": "Turbulent mixing effect or wave-like patterns caused by liquid and solid particles of the atmosphere can be detected around the area. No deformation activity can be detected."
 }
 ```
+
+### Annotation Processing
+
+All the necessary utilities are contained in annotation_utils. One can directy load the annotation file or the segmentation mask(s) of the desired interferogram.
+
+#### Segmentation mask example:
+
+```
+from annotation_utils import *
+
+annotation = 'annotations/10478.json'
+get_segmentation(annotation,verbose=True)
+
+```
+
+#### Reproduce cropped patches
+
+If needed one can reproduce the cropped patches with the desired resolution using the save_crops utility.
+```
+save_crops(annotation_folder='YOUR_ANNOTATION_FOLDER/',save_path = 'OUTPUT_PATH',mask_path='PATH_TO_SAVE_MASKS')
+```
+
+The functions 
+`crop_around_object(annotation_path,verbose=True,output_size=224,index=0)` and `image_tiling(image,tile_size=224)` handle the cropping of the interferograms. When the InSAR of interest contains ground deformation the function `crop_around_object` is called, otherwise the InSAR is split in non-overlapping patches with `image_tiling`. 
+
+`crop_around_object` makes sure to include the deformation pattern in a random crop at the desired resolution without excluding the presence of multiple ground deformation types in the cropped patch.
+
+
+
+
