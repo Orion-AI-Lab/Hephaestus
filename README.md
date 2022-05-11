@@ -22,7 +22,7 @@ If you use this work, please cite:
 
 ### Dataset and pretrained models
 
-The annotation files can be downloaded [here](https://www.dropbox.com/s/w7vse4elqu0rfen/Hephaestus_Annotations.zip?dl=0).
+The annotation files can be downloaded [here](https://www.dropbox.com/s/i08mz5514gczksz/annotations_hephaestus.zip?dl=0).
 
 The raw InSAR data can be found [here](dropboxlink).
 
