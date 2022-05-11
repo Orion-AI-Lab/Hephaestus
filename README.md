@@ -70,7 +70,7 @@ Each labeled InSAR is accompanied by a json file containing the annotation detai
     "Non_Deformation" #Labels. May contain multiple elements.
   ],
   "activity_type": [], #Activity type of each ground deformation pattern.
-  "intensity_level": "None", #Intensity of the event.
+  "intensity_level": ["None"], #Intensity level of each activity type.
   "phase": "Rest", #Phase of the volcano. Rest/Unrest/Rebound.
   "confidence": 0.8, #Confidence of the annotator for this annotation.
   "segmentation_mask": [], #List of polygons containing the ground deformation patterns.
