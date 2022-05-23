@@ -45,8 +45,8 @@ The directory structure for the cropped patches is:
 |   |-- Masks
 |   |-- Cropped patches
 ```
-
-The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0)
+#### Pretrained encoder
+The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0).
 
 ### Annotation
 
