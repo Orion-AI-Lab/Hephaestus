@@ -46,6 +46,8 @@ The directory structure for the cropped patches is:
 |   |-- Cropped patches
 ```
 
+The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0)
+
 ### Annotation
 
 The dataset contains both labeled and unlabeled data. The labeled part covers 38 frames summing up to 19,919 annotated InSAR.
