@@ -2,21 +2,18 @@
 
 Work in progress.
 
-This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://arxiv.org/abs/2204.09435)
+This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://openaccess.thecvf.com/content/CVPR2022W/EarthVision/papers/Bountos_Hephaestus_A_Large_Scale_Multitask_Dataset_Towards_InSAR_Understanding_CVPRW_2022_paper.pdf) as published in CVPR 2022 workshop Earthvision.
 
 If you use this work, please cite:
 ```
-@misc{https://doi.org/10.48550/arxiv.2204.09435,
-  doi = {10.48550/ARXIV.2204.09435},
-  url = {https://arxiv.org/abs/2204.09435}, 
-  author = {Bountos, Nikolaos Ioannis and Papoutsis, Ioannis and Michail, Dimitrios and Karavias, Andreas and Elias, Panagiotis and Parcharidis, Isaak}  
-  keywords = {Computer Vision and Pattern Recognition (cs.CV), Instrumentation and Methods for Astrophysics (astro-ph.IM), Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences, FOS: Physical sciences, FOS: Physical sciences},
-  title = {Hephaestus: A large scale multitask dataset towards InSAR understanding},
-  publisher = {arXiv}, 
-  year = {2022}, 
-  copyright = {arXiv.org perpetual, non-exclusive license}
+@InProceedings{Bountos_2022_CVPR,
+    author    = {Bountos, Nikolaos Ioannis and Papoutsis, Ioannis and Michail, Dimitrios and Karavias, Andreas and Elias, Panagiotis and Parcharidis, Isaak},
+    title     = {Hephaestus: A Large Scale Multitask Dataset Towards InSAR Understanding},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
+    month     = {June},
+    year      = {2022},
+    pages     = {1453-1462}
 }
-
 ```
 
 
