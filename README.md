@@ -1,7 +1,5 @@
 # Hephaestus Dataset
 
-Work in progress.
-
 This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://openaccess.thecvf.com/content/CVPR2022W/EarthVision/papers/Bountos_Hephaestus_A_Large_Scale_Multitask_Dataset_Towards_InSAR_Understanding_CVPRW_2022_paper.pdf) as published in CVPR 2022 workshop Earthvision.
 
 If you use this work, please cite:
