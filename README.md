@@ -31,6 +31,7 @@ The dataset is organized in the following structure:
 ```
 
 The cropped 224x224 patches, along with the respective masks and labels can be found [here](https://www.dropbox.com/s/2bkpj79jepk0vks/Hephaestus_Classification.zip?dl=0).
+Some examples of these patches can be seen in the following figure. ![figure](examples.png)
 
 The directory structure for the cropped patches is:
 
@@ -40,8 +41,26 @@ The directory structure for the cropped patches is:
 |   |-- Masks
 |   |-- Cropped patches
 ```
-#### Pretrained encoder
+#### Pretrained encoders
 The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0).
+
+The ResNet152 (MoCov2) pretrained encoder can be found [here]().
+Loading Example:
+```python
+model = torch.load('ResNet152_Encoder.pt')
+```
+
+#### Train SSL from scratch
+We currently support only MoCov2 (functionality for more will be added in the future). To choose backbone modify the architecture field in the configs.json
+Add your wandb-project and entity and the path of the dataset. If you want to continue from a checkpoint add the checkpoint's path at the resume_checkpoint field, otherwise insert false.
+
+To modify the augmentation set as well as the settings for MoCoV2 edit the respective configuration files in config/augmentations and config/method/mocov2
+
+To execute run
+```python
+python main.py
+```
+The script will automatically create folders for the checkpoints and store the config file and the wandb run id.
 
 ### Annotation
 
