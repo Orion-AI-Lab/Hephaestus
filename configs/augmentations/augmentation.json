@@ -1,0 +1,23 @@
+{
+    "augmentations": {
+        "RandomResizedCrop": {
+            "value": 224,
+            "p": 1.0
+        },
+        "GaussianBlur": {
+            "value": [
+                0.1,
+                2.0
+            ],
+            "p": 0.5
+        },
+        "HorizontalFlip": {
+            "value": "",
+            "p": 0.5
+        },
+        "ElasticTransform": {
+            "value": "",
+            "p": 0.8
+        }
+    }
+}

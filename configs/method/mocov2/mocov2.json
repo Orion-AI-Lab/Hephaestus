@@ -1,0 +1,12 @@
+{
+  "method": "mocov2",
+  "schedule": [120, 160],
+  "momentum": 0.9,
+  "weight_decay": 1e-4,
+  "moco_dim":128,
+  "moco_k":65646,
+  "moco_m":0.999,
+  "moco_t":0.07,
+  "mlp": true,
+  "cos": true
+}
