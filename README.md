@@ -45,7 +45,7 @@ The directory structure for the cropped patches is:
 The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0).
 
 The ResNet152 (MoCov2) pretrained encoder can be found [here]().
-Loading Example:
+ResNet1525 loading example:
 ```python
 model = torch.load('ResNet152_Encoder.pt')
 ```
@@ -54,9 +54,9 @@ model = torch.load('ResNet152_Encoder.pt')
 We currently support only MoCov2 (functionality for more will be added in the future). To choose backbone modify the architecture field in the configs.json
 Add your wandb-project and entity and the path of the dataset. If you want to continue from a checkpoint add the checkpoint's path at the resume_checkpoint field, otherwise insert false.
 
-To modify the augmentation set as well as the settings for MoCoV2 edit the respective configuration files in config/augmentations and config/method/mocov2
+To modify the augmentation set as well as the settings for MoCoV2, edit the respective configuration files in config/augmentations and config/method/mocov2.
 
-To execute run
+To initialize the training procedure run:
 ```python
 python main.py
 ```
