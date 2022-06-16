@@ -1,6 +1,9 @@
 # Hephaestus Dataset
 
+![hephaestus](hephaestus-logo.png)
+
 This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://openaccess.thecvf.com/content/CVPR2022W/EarthVision/papers/Bountos_Hephaestus_A_Large_Scale_Multitask_Dataset_Towards_InSAR_Understanding_CVPRW_2022_paper.pdf) as published in CVPR 2022 workshop Earthvision.
+
 
 If you use this work, please cite:
 ```
@@ -31,7 +34,9 @@ The dataset is organized in the following structure:
 ```
 
 The cropped 224x224 patches, along with the respective masks and labels can be found [here](https://www.dropbox.com/s/2bkpj79jepk0vks/Hephaestus_Classification.zip?dl=0).
-Some examples of these patches can be seen in the following figure. ![figure](examples.png)
+Some examples of these patches can be seen in the following figure. 
+
+![figure](examples.png)
 
 The directory structure for the cropped patches is:
 
@@ -56,7 +61,7 @@ Add your wandb-project and entity and the path of the dataset. If you want to co
 
 To modify the augmentation set as well as the settings for MoCoV2, edit the respective configuration files in config/augmentations and config/method/mocov2.
 
-To initialize the training procedure run:
+To initiate the training procedure run:
 ```python
 python main.py
 ```
@@ -133,3 +138,5 @@ The functions
 
 
 
+#### Acknowledgment
+This work is part of the project DeepCube and has been funded by the European Union’s Horizon 2020 research and innovation programme under grant agreement No 101004188
