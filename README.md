@@ -138,5 +138,7 @@ The functions
 
 
 
-#### Acknowledgment
+#### Acknowledgments
+Special thanks to Alexandros Makridis for the Hephaestus logo.
+
 This work is part of the project DeepCube and has been funded by the European Union’s Horizon 2020 research and innovation programme under grant agreement No 101004188
