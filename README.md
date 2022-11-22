@@ -127,13 +127,13 @@ mask_path = root_path + 'Hephaestus/masks/'
 save_path = root_path + 'Hephaestus/labeled/'
 raw_insar_path = root_path + 'Hephaestus_Raw/'
 annotation_folder = root_path + 'annotations/'
-save_crops(annotation_folder=annotation_folder,save_path=save_path,mask_path=mask_path,raw_insar_path=raw_insar_path,verbose=False)
+save_crops(annotation_folder=annotation_folder,save_path=save_path,mask_path=mask_path,raw_insar_path=raw_insar_path,out_size=224,verbose=False)
 ```
 
 The functions 
 `crop_around_object(annotation_path,verbose=True,output_size=224,index=0)` and `image_tiling(image,tile_size=224)` handle the cropping of the interferograms. When the InSAR of interest contains ground deformation the function `crop_around_object` is called, otherwise the InSAR is split in non-overlapping patches with `image_tiling`. 
 
-`crop_around_object` makes sure to include the deformation pattern in a random crop at the desired resolution without excluding the presence of multiple ground deformation types in the cropped patch.
+`crop_around_object` makes sure to include the deformation pattern in a random crop at the desired resolution without excluding the presence of multiple ground deformation types in the cropped patch. If the desired output size is smaller than the area of a deformation mask, a warning is issued and the mask is cropped accordingly.
 
 
 

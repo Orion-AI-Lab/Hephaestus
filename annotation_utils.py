@@ -99,7 +99,7 @@ def mask_boundaries(annotation_path,raw_insar_path='Hephaestus_Raw/',verbose=Tru
     return (row.min(),col.min()), (row.max(),col.max())
 
 
-def crop_around_object(annotation_path,verbose=True,output_size=224,raw_insar_path='Hephaestus_Raw/',index=0):
+def crop_around_object(annotation_path,verbose=True,output_size=64,raw_insar_path='Hephaestus_Raw/',index=0):
     '''
 
     :param annotation_path: annotation file path
@@ -117,11 +117,38 @@ def crop_around_object(annotation_path,verbose=True,output_size=224,raw_insar_pa
     mask = get_segmentation(annotation_path,raw_insar_path=raw_insar_path,verbose=False)[index]
     object_width = col_max - col_min
     object_height = row_max - row_min
-
-    random_right = np.random.randint(col_max+max(output_size-col_min,0),min(col_max+abs(output_size-object_width),mask.shape[1]))
+    low = col_max+max(output_size-col_min,0)
+    high = min(col_max+abs(output_size-object_width),mask.shape[1])
+    if object_width>=output_size:
+        low = col_min
+        high = col_min+output_size
+        print('='*20)
+        print('WARNING: MASK IS >= THAN DESIRED OUTPUT_SIZE OF: ',output_size,'. THE MASK WILL BE CROPPED TO FIT EXPECTED OUTPUT SIZE.')
+        print('='*20)
+        print('Object width: ',object_width)
+        print('Set low to: ',low)
+        print('Set high to: ',high)
+        print('Class: ',mask.max())
+    if low >= high:
+        print('Low', low)
+        print('High',high)
+        print('Object width: ',object_width)
+        print('Mask width: ',mask.shape[1])
+    random_right = np.random.randint(low,high)
     left = random_right - output_size
-
-    random_down = np.random.randint(row_max+max(output_size-row_min,0),min(row_max+abs(output_size-object_height),mask.shape[0]))
+    low_down = row_max+max(output_size-row_min,0)
+    high_down = min(row_max+abs(output_size-object_height),mask.shape[0])
+    if object_height>=output_size:
+        low_down = row_min
+        high_down = row_min+output_size
+        print('='*20)
+        print('WARNING: MASK IS >= THAN DESIRED OUTPUT_SIZE OF: ',output_size,'. THE MASK WILL BE CROPPED TO FIT EXPECTED OUTPUT SIZE.')
+        print('='*20)
+        print('Object height: ',object_height)
+        print('Set low to: ',low_down)
+        print('Set high to: ',high_down)
+        print('Class: ',mask.max())
+    random_down = np.random.randint(low_down,high_down)
     up = random_down - output_size
 
     #Unite Other Deformation Masks
@@ -155,7 +182,7 @@ def crop_around_object(annotation_path,verbose=True,output_size=224,raw_insar_pa
     return image[up:random_down,left:random_right,:], mask
 
 
-def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/',mask_path='Hephaestus/masks/',raw_insar_path='Hephaestus_Raw/',verbose=False):
+def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/',mask_path='Hephaestus/masks/',raw_insar_path='Hephaestus_Raw/',out_size=224,verbose=False):
     '''
 
     :param annotation_folder: folder of annotation jsons
@@ -180,7 +207,7 @@ def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/
         if 'Non_Deformation' in annotation['label']:
                 image_path = get_insar_path(annotation_folder+file,root_path=raw_insar_path)
                 image = cv.imread(image_path)
-                tiles = image_tiling(image)
+                tiles = image_tiling(image,tile_size=out_size)
                 for idx,tile in enumerate(tiles):
                     if image is None:
                         print(image_path)
@@ -198,7 +225,7 @@ def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/
                     json.dump(label_json,json_writer)
         elif int(annotation['is_crowd'])==0:
             if 'Non_Deformation' not in annotation['label']:
-                image, mask = crop_around_object(annotation_path=annotation_folder+file,verbose=False,raw_insar_path=raw_insar_path)
+                image, mask = crop_around_object(annotation_path=annotation_folder+file,verbose=False,raw_insar_path=raw_insar_path,output_size=out_size)
                 folder = str(class_dir[annotation['activity_type'][0]])
                 cv.imwrite(save_path+folder+'/'+file[:-5]+'.png',image)
                 cv.imwrite(mask_path+folder+'/'+file[:-5]+'.png',mask)
@@ -215,7 +242,7 @@ def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/
                 json.dump(label_json, json_writer)
         elif int(annotation['is_crowd'])>0:
             for deformation in range(len(annotation['segmentation_mask'])):
-                image, mask = crop_around_object(annotation_path=annotation_folder + file, verbose=False,raw_insar_path=raw_insar_path,index=deformation)
+                image, mask = crop_around_object(annotation_path=annotation_folder + file, verbose=False,raw_insar_path=raw_insar_path,index=deformation,output_size=out_size)
                 if verbose:
                     print('Deformation index:',deformation)
                     print('Seg length: ',len(annotation['segmentation_mask']))
@@ -245,17 +272,17 @@ def save_crops(annotation_folder='annotations/',save_path = 'Hephaestus/labeled/
     print('='*40)
 
 
-def image_tiling(image,tile_size=224):
+def image_tiling(image,tile_size=64):
     if image is None:
         return []
     max_rows = image.shape[0]//tile_size
     max_cols = image.shape[1]//tile_size
     tiles = []
     for i in range(max_rows):
-        starting_row = i * 224
+        starting_row = i * tile_size
         for j in range(max_cols):
-            starting_col = j * 224
-            img = image[starting_row:starting_row+224,starting_col:starting_col+224]
+            starting_col = j * tile_size
+            img = image[starting_row:starting_row+tile_size,starting_col:starting_col+tile_size]
             tiles.append(img)
 
     return tiles
