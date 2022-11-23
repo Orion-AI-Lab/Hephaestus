@@ -1,7 +1,7 @@
 {
     "augmentations": {
         "RandomResizedCrop": {
-            "value": 224,
+            "value": 200,
             "p": 1.0
         },
         "GaussianBlur": {
@@ -15,8 +15,21 @@
             "value": "",
             "p": 0.5
         },
+        "VerticalFlip": {
+            "value": "",
+            "p": 0.5
+        },
         "ElasticTransform": {
             "value": "",
+            "p": 0.6
+        },
+        "Cutout": {
+            "p": 0.8
+        },
+        "MultNoise": {
+            "p": 0.2
+        },
+        "GaussianNoise": {
             "p": 0.8
         }
     }

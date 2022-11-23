@@ -21,9 +21,17 @@ def get_augmentations(config):
             aug = A.augmentations.transforms.ColorJitter(brightness=v['value'][0],contrast=v['value'][1],saturation=v['value'][2],hue=v['value'][3],p=v['p'])
         elif k=='HorizontalFlip':
             aug = A.augmentations.transforms.HorizontalFlip(p=v['p'])
+        elif k=='VerticalFlip':
+            aug = A.augmentations.transforms.VerticalFlip(p=v['p'])
         elif k=='GaussianBlur':
             aug = A.augmentations.transforms.GaussianBlur(sigma_limit=v['value'],p=v['p'])
         elif k=='ElasticTransform':
             aug = A.augmentations.geometric.transforms.ElasticTransform(p=v['p'])
+        elif k=='Cutout':
+            aug = A.augmentations.dropout.coarse_dropout.CoarseDropout(p=v['p'])
+        elif k=='GaussianNoise':
+            aug = A.augmentations.transforms.GaussNoise(p=v['p'])
+        elif k=='MultNoise':
+            aug = A.augmentations.transforms.MultiplicativeNoise(p=v['p'])
         independend_aug.append(aug)
     return A.Compose(independend_aug)
