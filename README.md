@@ -16,7 +16,9 @@ If you use this work, please cite:
     pages     = {1453-1462}
 }
 ```
-
+### Dependancies
+This repo has been tested with python3.9. To install the necessary dependancies run:
+`pip install -r requirements.txt`
 
 ### Dataset and pretrained models
 
