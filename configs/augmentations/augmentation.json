@@ -1,7 +1,7 @@
 {
     "augmentations": {
         "RandomResizedCrop": {
-            "value": 200,
+            "value": 224,
             "p": 1.0
         },
         "GaussianBlur": {
@@ -9,15 +9,18 @@
                 0.1,
                 2.0
             ],
-            "p": 0.5
+            "p": 0.2
         },
         "HorizontalFlip": {
             "value": "",
-            "p": 0.5
+            "p": 0.2
         },
         "VerticalFlip": {
             "value": "",
-            "p": 0.5
+            "p": 0.2
+        },
+        "RandomRotation":{
+            "p":0.5
         },
         "ElasticTransform": {
             "value": "",
