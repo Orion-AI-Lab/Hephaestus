@@ -25,7 +25,7 @@ This repo has been tested with python3.9. To install the necessary dependancies 
 ### Multi-GPU / Multi-Node training
 You can make use of torchrun or SLURM to launch distributed jobs.
 
-###### torchrun   
+#### torchrun: 
 Single-Node Multi-GPU:
 ```
 torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py
@@ -46,7 +46,7 @@ torchrun \
 main.py
 ```
 
-###### SLURM:
+#### SLURM:
 After setting the relevant parameters inside hephaestus.slurm:
 ```
 sbatch hephaestus.slurm
