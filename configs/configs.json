@@ -12,24 +12,15 @@
   "batch_size": 64,
   "epochs": 200,
   "lr": 0.03,
-  "num_workers": 16,
+  "num_workers": 2,
   "mixed_precision": false,
   "pretrained": true,
 
   "resolution": 224,
   "num_channels": 3,
-  "gpu": -1,
 
   "print_frequency": 10,
   "resume_checkpoint": "YOUR_CHECKPOINT",
   "start_epoch": 0,
-
-  "distributed": true,
-  "multiprocessing_distributed": true,
-  "world_size": 1,
-  "rank": 0,
-  "dist_url": "tcp://127.0.0.1:15151",
-  "dist_backend": "nccl",
   "seed": ""
-
 }

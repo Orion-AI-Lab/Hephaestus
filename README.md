@@ -1,6 +1,8 @@
 # Hephaestus Dataset
 
-![hephaestus](hephaestus-logo.png)
+<p align="center">
+  <img src="docs/hephaestus-logo.png">
+</p>
 
 This repository contains the data and code used in [Hephaestus: A large scale multitask dataset towards InSAR understanding](https://openaccess.thecvf.com/content/CVPR2022W/EarthVision/papers/Bountos_Hephaestus_A_Large_Scale_Multitask_Dataset_Towards_InSAR_Understanding_CVPRW_2022_paper.pdf) as published in CVPR 2022 workshop Earthvision.
 
@@ -17,8 +19,38 @@ If you use this work, please cite:
 }
 ```
 ### Dependancies
-This repo has been tested with python3.9. To install the necessary dependancies run:
+This repo has been tested with python3.9. To install the necessary dependancies run:   
 `pip install -r requirements.txt`
+
+### Multi-GPU / Multi-Node training
+You can make use of torchrun or SLURM to launch distributed jobs.
+
+###### torchrun   
+Single-Node Multi-GPU:
+```
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py
+```
+
+Multi-Node Multi-GPU:
+```
+# On XXX.XXX.XXX.62 (the master node)
+torchrun \
+--nproc_per_node=2 --nnodes=2 --node_rank=0 \
+--master_addr=XXX.XXX.XXX.62 --master_port=1234 \
+main.py
+
+# On XXX.XXX.XXX.63 (the worker node)
+torchrun \
+--nproc_per_node=2 --nnodes=2 --node_rank=1 \
+--master_addr=XXX.XXX.XXX.62 --master_port=1234 \
+main.py
+```
+
+###### SLURM:
+After setting the relevant parameters inside hephaestus.slurm:
+```
+sbatch hephaestus.slurm
+```
 
 ### Dataset and pretrained models
 
@@ -38,7 +70,7 @@ The dataset is organized in the following structure:
 The cropped 224x224 patches, along with the respective masks and labels can be found [here](https://www.dropbox.com/s/2bkpj79jepk0vks/Hephaestus_Classification.zip?dl=0).
 Some examples of these patches can be seen in the following figure. 
 
-![figure](examples.png)
+![figure](docs/examples.png)
 
 The directory structure for the cropped patches is:
 
@@ -72,7 +104,7 @@ The script will automatically create folders for the checkpoints and store the c
 ### Annotation
 
 The dataset contains both labeled and unlabeled data. The labeled part covers 38 frames summing up to 19,919 annotated InSAR.
-The list of the studied volcanoes, along with the temporal distribution of their samples can be seen below. ![below](volcano_distribution.png)
+The list of the studied volcanoes, along with the temporal distribution of their samples can be seen below. ![below](docs/volcano_distribution.png)
 
 Each labeled InSAR is accompanied by a json file containing the annotation details. Below we present an example of an annotation file. A detailed description can be seen in the original paper (section 2.2):
 ```python
