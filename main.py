@@ -265,7 +265,7 @@ def exec_model(model, args):
     print(model)
 
     model.cuda()
-    args["batch_size"] = int(args["batch_size"] / int(args["world_size"]))
+
     model = torch.nn.parallel.DistributedDataParallel(
         model, device_ids=[args["local_rank"]]
     )
