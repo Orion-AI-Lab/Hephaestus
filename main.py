@@ -284,10 +284,7 @@ def exec_model(model, args):
     if args["resume_checkpoint"]:
         if os.path.isfile(args["resume_checkpoint"]):
             print("=> loading checkpoint '{}'".format(args["resume_checkpoint"]))
-            map_location = {"cuda:%d" % 0: "cuda:%d" % args["local_rank"]}
-            checkpoint = torch.load(
-                args["resume_checkpoint"], map_location=map_location
-            )
+            checkpoint = torch.load(args["resume_checkpoint"], map_location="cpu")
             args["start_epoch"] = checkpoint["epoch"]
             model.load_state_dict(checkpoint["state_dict"])
             optimizer.load_state_dict(checkpoint["optimizer"])
