@@ -117,6 +117,32 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
         shutil.copyfile(filename, "model_best.pth.tar")
 
 
+def load_checkpoint(model, optimizer, args):
+    if args["resume_checkpoint"]:
+        if os.path.isfile(args["resume_checkpoint"]):
+            print("=> loading checkpoint '{}'".format(args["resume_checkpoint"]))
+            checkpoint = torch.load(args["resume_checkpoint"], map_location="cpu")
+            args["start_epoch"] = checkpoint["epoch"]
+
+            for key in list(checkpoint["state_dict"].keys()):
+                checkpoint["state_dict"][key.replace("module.", "")] = checkpoint[
+                    "state_dict"
+                ][key]
+                del checkpoint["state_dict"][key]
+
+            msg = model.load_state_dict(checkpoint["state_dict"])
+            print(msg)
+
+            optimizer.load_state_dict(checkpoint["optimizer"])
+            print(
+                "=> loaded checkpoint '{}' (epoch {})".format(
+                    args["resume_checkpoint"], checkpoint["epoch"]
+                )
+            )
+        else:
+            print("=> no checkpoint found at '{}'".format(args["resume_checkpoint"]))
+
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 
@@ -236,8 +262,6 @@ def exec_model(model, args):
     else:
         raise NotImplementedError("Only DistributedDataParallel is supported.")
 
-    print("=> creating model '{}'".format(args["architecture"]))
-
     if is_global_master(args):
         # Initialize wandb
         print("Initializing Wandb")
@@ -262,39 +286,26 @@ def exec_model(model, args):
             )
             json.dump({"wandb_id": id}, open(args["checkpoint_path"] + "/id.json", "w"))
         wandb.watch(model)
+
+    print("=> creating model '{}'".format(config["architecture"]))
     print(model)
 
     model.cuda()
+    optimizer = torch.optim.SGD(
+        model.parameters(),
+        config["lr"],
+        momentum=config["momentum"],
+        weight_decay=config["weight_decay"],
+    )
+
+    load_checkpoint(model, optimizer, args)
 
     model = torch.nn.parallel.DistributedDataParallel(
         model, device_ids=[args["local_rank"]]
     )
 
-    # define loss function (criterion) and optimizer
+    # define loss function (criterion)
     criterion = nn.CrossEntropyLoss().cuda()
-
-    optimizer = torch.optim.SGD(
-        model.parameters(),
-        args["lr"],
-        momentum=args["momentum"],
-        weight_decay=args["weight_decay"],
-    )
-
-    # optionally resume from a checkpoint
-    if args["resume_checkpoint"]:
-        if os.path.isfile(args["resume_checkpoint"]):
-            print("=> loading checkpoint '{}'".format(args["resume_checkpoint"]))
-            checkpoint = torch.load(args["resume_checkpoint"], map_location="cpu")
-            args["start_epoch"] = checkpoint["epoch"]
-            model.load_state_dict(checkpoint["state_dict"])
-            optimizer.load_state_dict(checkpoint["optimizer"])
-            print(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    args["resume_checkpoint"], checkpoint["epoch"]
-                )
-            )
-        else:
-            print("=> no checkpoint found at '{}'".format(args["resume_checkpoint"]))
 
     cudnn.benchmark = True
 
@@ -342,6 +353,7 @@ if __name__ == "__main__":
     config_path = "configs/configs.json"
     config = prepare_configuration(config_path)
     json.dump(config, open(config["checkpoint_path"] + "/config.json", "w"))
+
     if config["method"] == "mocov2":
         model = builder.MoCo(
             config,
