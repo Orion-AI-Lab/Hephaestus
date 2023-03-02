@@ -118,29 +118,28 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
 
 
 def load_checkpoint(model, optimizer, args):
-    if args["resume_checkpoint"]:
-        if os.path.isfile(args["resume_checkpoint"]):
-            print("=> loading checkpoint '{}'".format(args["resume_checkpoint"]))
-            checkpoint = torch.load(args["resume_checkpoint"], map_location="cpu")
-            args["start_epoch"] = checkpoint["epoch"]
+    if os.path.isfile(args["resume_checkpoint"]):
+        print("=> loading checkpoint '{}'".format(args["resume_checkpoint"]))
+        checkpoint = torch.load(args["resume_checkpoint"], map_location="cpu")
+        args["start_epoch"] = checkpoint["epoch"]
 
-            for key in list(checkpoint["state_dict"].keys()):
-                checkpoint["state_dict"][key.replace("module.", "")] = checkpoint[
-                    "state_dict"
-                ][key]
-                del checkpoint["state_dict"][key]
+        for key in list(checkpoint["state_dict"].keys()):
+            checkpoint["state_dict"][key.replace("module.", "")] = checkpoint[
+                "state_dict"
+            ][key]
+            del checkpoint["state_dict"][key]
 
-            msg = model.load_state_dict(checkpoint["state_dict"])
-            print(msg)
+        msg = model.load_state_dict(checkpoint["state_dict"])
+        print(msg)
 
-            optimizer.load_state_dict(checkpoint["optimizer"])
-            print(
-                "=> loaded checkpoint '{}' (epoch {})".format(
-                    args["resume_checkpoint"], checkpoint["epoch"]
-                )
+        optimizer.load_state_dict(checkpoint["optimizer"])
+        print(
+            "=> loaded checkpoint '{}' (epoch {})".format(
+                args["resume_checkpoint"], checkpoint["epoch"]
             )
-        else:
-            print("=> no checkpoint found at '{}'".format(args["resume_checkpoint"]))
+        )
+    else:
+        print("=> no checkpoint found at '{}'".format(args["resume_checkpoint"]))
 
 
 class AverageMeter(object):
@@ -298,7 +297,8 @@ def exec_model(model, args):
         weight_decay=config["weight_decay"],
     )
 
-    load_checkpoint(model, optimizer, args)
+    if args["resume_checkpoint"]:
+        load_checkpoint(model, optimizer, args)
 
     model = torch.nn.parallel.DistributedDataParallel(
         model, device_ids=[args["local_rank"]]
