@@ -272,6 +272,7 @@ def exec_model(model, args):
                 entity=args["wandb_entity"],
                 id=args["wandb_id"],
                 resume=args["resume_wandb"],
+                config=args
             )
         else:
             id = wandb.sdk.lib.runid.generate_id()
