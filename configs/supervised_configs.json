@@ -9,6 +9,7 @@
     "contrastive":false,
     "split_path":"./train_test_split.json",
     "supervised_data_path":"/mnt/nvme1/nbountos/datasets/HephaestusSSL",
+    "cls_path":"/mnt/nvme1/nbountos/datasets/HephaestusSSL/cls_labels/",
     "data_path":"/mnt/nvme1/nbountos/datasets/Hephaestus_Raw",
     "batch_size":64,
     "num_workers":12,

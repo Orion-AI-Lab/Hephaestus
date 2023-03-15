@@ -89,9 +89,9 @@ class SupervisedDataset(torch.utils.data.Dataset):
         self.negatives = []
         self.frameIDs = []
         self.augmentations = augmentations.get_augmentations(config)
-        
+        root_path = self.config['cls_path']
         for file in self.valid_files:
-            annotation = json.load(open(file,'r'))
+            annotation = json.load(open(root_path + file,'r'))
             sample = file.split('/')[-1]
             insar_path = self.config['supervised_data_path'] + '/labeled/'+str(annotation['Deformation'][0])+'/' + sample[:-5] + '.png'
             mask_path = self.config['supervised_data_path'] + '/masks/'+str(annotation['Deformation'][0])+'/' + sample[:-5] + '.png'
