@@ -69,6 +69,10 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
     print(metric.compute())
 
     if configs['wandb']:
+        if configs['linear_evaluation']:
+            mode = mode + ' LE'
+        else:
+            mode = mode + ' FT'
         wandb.log({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute(), mode + ' Avg. Precision':average_precision.compute(), mode + 'Loss: ':loss/len(loader.dataset)})
     print({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute(), mode + ' Avg. Precision':average_precision.compute()}, mode + 'Loss: ',loss/len(loader.dataset),'Epoch: ',epoch)
     
@@ -102,8 +106,17 @@ def train_cls(configs):
         print('='*20)
         print('Creating SSL model pretrained on Hephaestus')
         print('='*20)
-        
-        model = torch.load('pretrained_encoder_resnet50.pt',map_location=configs['device'])
+        id_json = json.load(open(configs['ssl_run_id_path'],'r'))
+        configs["wandb_id"] = id_json["wandb_id"]
+        print('SSL Wandb ID: ',configs['wandb_id'])
+        if configs['wandb']:
+            wandb.init(
+                project=configs["wandb_project"],
+                entity=configs["wandb_entity"],
+                id=configs["wandb_id"],
+                resume=True)
+        model = torch.load(configs['ssl_encoder'],map_location=configs['device'])
+        print(model)
         out_dim = 2048
         
         if configs['linear_evaluation']:
@@ -124,8 +137,7 @@ def train_cls(configs):
     best_stats = {}
     for epoch in range(configs['epochs']):
         for idx, batch in tqdm(enumerate(train_loader)):
-            if idx>200:
-                break
+            
             optimizer.zero_grad()
             if not configs['linear_evaluation']:
                 model.train()
@@ -149,7 +161,10 @@ def train_cls(configs):
             optimizer.step()
 
             if idx%100 == 0:
-                log_dict = {'Loss: ':loss.mean().item(),' Train accuracy: ':accuracy.compute(),'Epoch':epoch}
+                if configs['linear_evaluation']:
+                    log_dict = {'LE Loss: ':loss.mean().item(),'LE Train accuracy: ':accuracy.compute(),'LE Epoch':epoch}
+                else:
+                    log_dict = {'FT Loss: ':loss.mean().item(),'FT Train accuracy: ':accuracy.compute(),'FT Epoch':epoch}
                 print(log_dict)
                 if configs['wandb']:
                     wandb.log(log_dict)
@@ -177,10 +192,11 @@ if __name__== '__main__':
 
     config_path = 'configs/supervised_configs.json'
     configs =json.load(open(config_path,'r'))
+
     augmentation_cfg = json.load(open("configs/augmentations/augmentation.json", "r"))
     configs.update(augmentation_cfg)
     configs['checkpoint_path'] = define_checkpoint(configs)
-    if configs['wandb']:
+    if configs['wandb'] and not configs['ssl_encoder']:
         wandb.init(
                     project=configs['wandb_project'],
                     entity=configs['wandb_entity'],
