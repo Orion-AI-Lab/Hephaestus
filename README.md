@@ -83,10 +83,9 @@ The directory structure for the cropped patches is:
 #### Pretrained encoders
 The SSL (MoCov2) pretrained ResNet18 can be found [here](https://www.dropbox.com/s/t5w8x44p32gacf3/ResNet18-MocoV2.pth.tar?dl=0).
 
-The ResNet152 (MoCov2) pretrained encoder can be found [here]().
-ResNet152 loading example:
+ResNet18 loading example:
 ```python
-model = torch.load('ResNet152_Encoder.pt')
+model = torch.load('ResNet18_Encoder.pt')
 ```
 
 #### Train SSL from scratch
