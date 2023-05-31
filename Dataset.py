@@ -6,8 +6,10 @@ import torch
 from tqdm import tqdm
 import json
 from utilities import augmentations
+import annotation_utils
 import random
 import einops
+import torchvision
 
 np.random.seed(999)
 torch.manual_seed(999)
@@ -182,3 +184,115 @@ class SupervisedDataset(torch.utils.data.Dataset):
             label = torch.tensor(label).long()
             mask = np.zeros((224,224))
             return (insar.float(), torch.from_numpy(mask).long(), label)
+
+
+class FullFrameDataset(torch.utils.data.Dataset):
+    def __init__(self, config, mode='train'):
+        self.data_path = config["data_path"]
+        self.config = config
+        self.mode = mode
+        if config['augment']:
+            self.augmentations = augmentations.get_augmentations(config)
+        else:
+            self.augmentations = None
+        
+        self.interferograms = []
+        self.channels = config["num_channels"]
+        annotation_path = './annotations/'
+        annotations = os.listdir(annotation_path)
+        frames = os.listdir(self.data_path)
+        unique_frames = np.unique(frames)
+        test_frames = ['124D_04854_171313','022D_04826_121209','087D_07004_060904']
+
+        self.frame_dict = {}
+        for idx, frame in enumerate(unique_frames):
+            self.frame_dict[frame] = idx
+        self.positives = []
+        self.negatives = []
+        for idx, annotation_file in tqdm(enumerate(annotations)):
+            annotation = json.load(open(annotation_path + annotation_file,'r'))
+            if annotation['frameID'] in test_frames and (mode=='train' or mode=='val'):
+                continue
+            if annotation['frameID'] not in test_frames and mode=='test':
+                continue
+            if 'Non_Deformation' in annotation['label']:
+                label = 0
+            else:
+                label = 1
+            sample_dict = {'frameID':annotation['frameID'],'insar_path':annotation_utils.get_insar_path(annotation_path=annotation_path + annotation_file,root_path=self.config['data_path']),'label':annotation}
+            self.interferograms.append(sample_dict)
+            if label == 0:
+                self.negatives.append(sample_dict)
+            else:
+                self.positives.append(sample_dict)
+        self.num_examples = len(self.interferograms)
+        random.Random(999).shuffle(self.positives)
+        random.Random(999).shuffle(self.negatives)
+        if self.mode=='train':
+            self.positives = self.positives[:int(0.9*len*self.positives)]
+            self.negatives = self.negatives[:int(0.9*len(self.negatives))]
+            self.interferograms = self.positives
+            self.interferograms.extend(self.negatives)
+        elif self.mode=='val':
+            self.positives = self.positives[int(0.9*len*self.positives):]
+            self.negatives = self.negatives[int(0.9*len(self.negatives)):]
+            self.interferograms = self.positives
+            self.interferograms.extend(self.negatives)
+        print('Mode: ',self.mode,' Number of examples: ',self.num_examples)
+
+    def __len__(self):
+        return self.num_examples
+
+    def prepare_insar(self, insar):
+        insar = torch.from_numpy(insar).float().permute(2, 0, 1)
+        insar /= 255
+        normalize = torchvision.transforms.Normalize(mean=[0.5472, 0.7416],std=[0.4142, 0.2995])
+        insar = normalize(insar)
+        return insar
+
+    def read_insar(self, path):
+        insar = cv.imread(path, 0)
+        if insar is None:
+            print("None")
+            return insar, 0
+        coherence_path = path[:-8] + 'cc.png'
+        coherence = cv.imread(coherence_path,0)
+        insar = einops.rearrange([insar, coherence], 'c h w -> c h w')
+        
+        if insar is None:
+            print("None")
+            return insar, 0
+
+        insar = self.prepare_insar(insar)
+        return insar, 0
+
+    def __getitem__(self, index):
+        insar = None
+        if self.config['oversampling'] and self.mode=='train':
+            while insar is None:
+                choice = random.randint(0,1)
+                if choice == 0:
+                    choice_neg = random.randint(0,len(self.negatives)-1)
+                    sample = self.negatives[choice_neg]
+                else:
+                    choice_pos = random.randint(0,len(self.positives)-1)
+                    sample = self.positives[choice_pos]
+                    
+                insar, _ = self.read_insar(sample['insar_path'])
+        else: 
+            while insar is None:
+                sample = self.interferograms[index]
+                path = sample["insar_path"]
+
+                insar, _ = self.read_insar(path)
+                if insar is None:
+                    if index < self.num_examples - 1:
+                        index += 1
+                    else:
+                        index = 0
+        annotation = sample['label']
+        if 'Non_Deformation' in annotation['label']:
+            label = 0
+        else:
+            label = 1
+        return insar, torch.tensor(label).long()

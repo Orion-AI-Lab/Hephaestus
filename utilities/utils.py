@@ -6,7 +6,7 @@ import timm
 import torch
 import torch.distributed as dist
 import torch.nn as nn
-
+import Dataset
 
 def create_checkpoint_directory(args,wandb_run=None):
     if wandb_run is None:
@@ -73,3 +73,21 @@ def load_encoder(checkpoint_path,config=None):
         model.module.encoder_q.fc = nn.Identity()
         torch.save(model.module.encoder_q,'pretrained_encoder_'+config['architecture']+'.pt')
         return model.module.encoder_q
+
+
+
+def prepare_supervised_learning_loaders(configs):
+    train_dataset = Dataset.FullFrameDataset(config=configs,mode='train')
+    val_dataset = Dataset.FullFrameDataset(config=configs,mode='val')
+    test_dataset = Dataset.FullFrameDataset(config=configs,mode='test')
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True, num_workers=configs['num_workers'],pin_memory=True,
+                                     drop_last=True)
+
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=configs['batch_size'], shuffle=False, num_workers=configs['num_workers'],pin_memory=True,
+                                     drop_last=False)
+
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=configs['batch_size'], shuffle=False, num_workers=configs['num_workers'], pin_memory=True,
+                                     drop_last=False)
+    
+    return train_loader, val_loader, test_loader
