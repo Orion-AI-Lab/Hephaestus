@@ -21,8 +21,8 @@ def get_augmentations(config):
             aug = A.augmentations.HorizontalFlip(p=v["p"])
         elif k == "VerticalFlip":
             aug = A.augmentations.VerticalFlip(p=v["p"])
-        elif k == 'RandomRotation':
-            aug = A.augmentations.Rotate(p=v['p'])
+        elif k == "RandomRotation":
+            aug = A.augmentations.Rotate(p=v["p"])
         elif k == "GaussianBlur":
             aug = A.augmentations.GaussianBlur(sigma_limit=v["value"], p=v["p"])
         elif k == "ElasticTransform":

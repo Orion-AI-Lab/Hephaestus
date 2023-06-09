@@ -4,7 +4,10 @@
   "wandb_id": "None",
   "resume_wandb": true,
 
+  "webdataset": true,
+  "wds_size":885388,
   "data_path":"YOUR_PATH/Hephaestus_Raw",
+
   "architecture": "resnet152",
   "method": "mocov2",
   "augmentation_config": "configs/augmentations/augmentation.json",
