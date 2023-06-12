@@ -29,11 +29,13 @@ class MoCo(nn.Module):
             config["architecture"].lower(),
             num_classes=dim,
             pretrained=config["pretrained"],
+            in_chans=2
         )  # base_encoder(num_classes=dim)
         self.encoder_k = timm.create_model(
             config["architecture"].lower(),
             num_classes=dim,
             pretrained=config["pretrained"],
+            in_chans=2
         )  # base_encoder(num_classes=dim)
 
         if mlp:  # hack: brute-force replacement
