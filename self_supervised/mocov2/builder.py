@@ -27,12 +27,14 @@ class MoCo(nn.Module):
         # num_classes is the output fc dimension
         self.encoder_q = timm.create_model(
             config["architecture"].lower(),
+            in_chans=config["num_channels"],
             num_classes=dim,
             pretrained=config["pretrained"],
             in_chans=2
         )  # base_encoder(num_classes=dim)
         self.encoder_k = timm.create_model(
             config["architecture"].lower(),
+            in_chans=config["num_channels"],
             num_classes=dim,
             pretrained=config["pretrained"],
             in_chans=2
