@@ -10,7 +10,7 @@ import annotation_utils
 import random
 import einops
 import torchvision
-
+import albumentations as A
 np.random.seed(999)
 torch.manual_seed(999)
 random.seed(999)
@@ -198,7 +198,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
         
         self.interferograms = []
         self.channels = config["num_channels"]
-        annotation_path = './annotations/'
+        annotation_path = config['annotation_path']
         annotations = os.listdir(annotation_path)
         frames = os.listdir(self.data_path)
         unique_frames = np.unique(frames)
@@ -225,26 +225,31 @@ class FullFrameDataset(torch.utils.data.Dataset):
                 self.negatives.append(sample_dict)
             else:
                 self.positives.append(sample_dict)
-        self.num_examples = len(self.interferograms)
         random.Random(999).shuffle(self.positives)
         random.Random(999).shuffle(self.negatives)
         if self.mode=='train':
-            self.positives = self.positives[:int(0.9*len*self.positives)]
+            self.positives = self.positives[:int(0.9*len(self.positives))]
             self.negatives = self.negatives[:int(0.9*len(self.negatives))]
-            self.interferograms = self.positives
-            self.interferograms.extend(self.negatives)
+            self.interferograms = self.positives.copy()
+            self.interferograms.extend(self.negatives.copy())
+            self.num_examples = len(self.interferograms)
         elif self.mode=='val':
-            self.positives = self.positives[int(0.9*len*self.positives):]
+            self.positives = self.positives[int(0.9*len(self.positives)):]
             self.negatives = self.negatives[int(0.9*len(self.negatives)):]
-            self.interferograms = self.positives
-            self.interferograms.extend(self.negatives)
+            self.interferograms = self.positives.copy()
+            self.interferograms.extend(self.negatives.copy())
+            self.num_examples = len(self.interferograms)
+        else:
+            self.num_examples = len(self.interferograms)
+
         print('Mode: ',self.mode,' Number of examples: ',self.num_examples)
 
     def __len__(self):
         return self.num_examples
 
     def prepare_insar(self, insar):
-        insar = torch.from_numpy(insar).float().permute(2, 0, 1)
+        
+        insar = torch.from_numpy(insar).float()
         insar /= 255
         normalize = torchvision.transforms.Normalize(mean=[0.5472, 0.7416],std=[0.4142, 0.2995])
         insar = normalize(insar)
@@ -257,8 +262,18 @@ class FullFrameDataset(torch.utils.data.Dataset):
             return insar, 0
         coherence_path = path[:-8] + 'cc.png'
         coherence = cv.imread(coherence_path,0)
-        insar = einops.rearrange([insar, coherence], 'c h w -> c h w')
-        
+        if coherence is None:
+            print('Coherence None')
+            return coherence, 0
+        rsz = A.augmentations.Resize(height=224,width=224)
+        transform = rsz(image =insar)
+        insar = transform['image']
+        transform = rsz(image =coherence)
+        coherence = transform['image']
+        insar = np.asarray([insar,coherence])
+
+        #insar = einops.rearrange([insar, coherence], 'c h w -> c h w')
+
         if insar is None:
             print("None")
             return insar, 0

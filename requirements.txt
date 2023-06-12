@@ -6,3 +6,5 @@ timm==0.6.12
 albumentations==1.3.0
 kornia==0.6.9
 wandb==0.13.7
+einops
+torchmetrics

@@ -30,7 +30,7 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
         checkpoint_path = 'best_model_task_'+configs['task']+'.pt'
         model = torch.load(configs['checkpoint_path'] / checkpoint_path)['model']
     model.eval()
-    accuracy, fscore, precision, recall, _, average_precision = utils.initialize_metrics(configs)
+    accuracy, fscore, precision, recall = utils.initialize_metrics(configs)
     metric = BinaryStatScores().to(configs['device'])
     loss = 0.0
     prediction_list = []
@@ -38,7 +38,10 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
     
     with torch.no_grad():
         for batch in tqdm(loader):
-            insar, _ , label = batch
+            if configs['ssl_encoder'] is None:
+                insar, _ , label = batch
+            else:
+                insar, label = batch
             insar = insar.to(configs['device'])
 
             label = label.to(configs['device'])
@@ -61,7 +64,7 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
             fscore(predictions,label)
             precision(predictions,label)
             recall(predictions,label)
-            average_precision(out[:,1].float(), label)
+            #average_precision(out[:,1].float(), label)
 
             metric(predictions, label)
             loss += criterion(out,label)
@@ -73,8 +76,8 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
             mode = mode + ' LE'
         else:
             mode = mode + ' FT'
-        wandb.log({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute(), mode + ' Avg. Precision':average_precision.compute(), mode + 'Loss: ':loss/len(loader.dataset)})
-    print({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute(), mode + ' Avg. Precision':average_precision.compute()}, mode + 'Loss: ',loss/len(loader.dataset),'Epoch: ',epoch)
+        wandb.log({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute(),  mode + 'Loss: ':loss/len(loader.dataset)})
+    print({mode+ ' F-Score':fscore.compute(),mode+' Acc':accuracy.compute(),mode + ' Precision':precision.compute(),mode + ' Recall': recall.compute()}, mode + 'Loss: ',loss/len(loader.dataset),'Epoch: ',epoch)
     
     return fscore.compute()
 
@@ -82,7 +85,7 @@ def eval_cls(configs,loader,criterion,mode='Val',model=None, epoch=-1):
 def train_cls(configs):
     train_loader, val_loader, test_loader = utils.prepare_supervised_learning_loaders(configs)
 
-    accuracy, fscore, precision, recall, _, avg = utils.initialize_metrics(configs)
+    accuracy, fscore, precision, recall  = utils.initialize_metrics(configs)
     class_weights = torch.tensor(configs['class_weights']).to(configs['device'])
     if configs['num_classes']>=2 or configs['num_classes']==1:
         criterion = nn.CrossEntropyLoss(weight=class_weights)
@@ -141,7 +144,10 @@ def train_cls(configs):
             optimizer.zero_grad()
             if not configs['linear_evaluation']:
                 model.train()
-            insar, _, label = batch
+            if not configs['ssl_encoder']:
+                insar, _, label = batch
+            else:
+                insar, label = batch
             insar = insar.to(configs['device'])
             label = label.to(configs['device'])
             if configs['num_classes']==1:

@@ -7,6 +7,7 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 import Dataset
+from torchmetrics import Accuracy, F1Score, JaccardIndex, Precision, Recall
 
 def create_checkpoint_directory(args,wandb_run=None):
     if wandb_run is None:
@@ -91,3 +92,10 @@ def prepare_supervised_learning_loaders(configs):
                                      drop_last=False)
     
     return train_loader, val_loader, test_loader
+
+def initialize_metrics(configs):
+    accuracy = Accuracy(task='multiclass', average='micro',multidim_average='global',num_classes=configs['num_classes']).to(configs['device'])
+    fscore = F1Score(task='multiclass', num_classes=configs['num_classes'],average='micro',multidim_average='global').to(configs['device'])
+    precision = Precision(task='multiclass', average='micro', num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
+    recall = Recall(task='multiclass', average='micro', num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
+    return accuracy, fscore, precision, recall
