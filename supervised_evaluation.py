@@ -1,4 +1,4 @@
-import json
+import pyjson5 as json
 import pprint
 import random
 from pathlib import Path
@@ -42,10 +42,7 @@ def eval_cls(configs, loader, criterion, mode="Val", model=None, epoch=-1):
 
     with torch.no_grad():
         for batch in tqdm(loader):
-            if configs['ssl_encoder'] is None:
-                insar, _ , label = batch
-            else:
-                insar, label = batch
+            insar, label = batch
             insar = insar.to(configs['device'])
 
             label = label.to(configs["device"])
@@ -105,6 +102,7 @@ def train_cls(configs):
         model = timm.create_model(
             configs["architecture"].lower(),
             num_classes=configs["num_classes"],
+            in_chans=2,
             pretrained=True,
         )
         if configs["linear_evaluation"]:
@@ -156,10 +154,7 @@ def train_cls(configs):
             optimizer.zero_grad()
             if not configs["linear_evaluation"]:
                 model.train()
-            if not configs['ssl_encoder']:
-                insar, _, label = batch
-            else:
-                insar, label = batch
+            insar, label = batch
             insar = insar.to(configs['device'])
             label = label.to(configs['device'])
             if configs['num_classes']==1:
