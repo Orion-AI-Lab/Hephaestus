@@ -8,8 +8,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from utilities import augmentations
-import annotation_utils
+from utilities import augmentations, annotation_utils
 import random
 import einops
 import torchvision
