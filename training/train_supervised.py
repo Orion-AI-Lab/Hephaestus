@@ -55,7 +55,7 @@ def train(configs):
     wandb.init(
                 project=configs["wandb_project"],
                 entity=configs["wandb_entity"],
-                resume=True
+                resume='allow'
             )
 
     criterion = nn.BCEWithLogitsLoss()
@@ -132,7 +132,7 @@ def test(configs,phase,model=None, loader = None, criterion = None,epoch='Test')
                 loss = criterion(out,label)
                 total_loss += loss.item()
                 for metric in metrics:
-                    metric(out,label)
+                    metric(predictions,label)
                 num_samples += image.shape[0]
                 
     total_loss = total_loss/num_samples
