@@ -12,7 +12,7 @@ if __name__ == "__main__":
         config_path = "configs/supervised_configs.json"
         configs = json.load(open(config_path,'r'))
         train_supervised.train(configs)
-        train_supervised.test(configs)
+        train_supervised.test(configs,phase='test')
     else:
         # Parse configurations
         config_path = "configs/configs.json"
