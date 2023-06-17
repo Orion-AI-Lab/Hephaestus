@@ -51,12 +51,14 @@ def train(configs):
     metrics = utils.initialize_metrics(configs)
     checkpoint_path = utils.create_checkpoint_directory(configs)
     configs['checkpoint_path'] = checkpoint_path
-
-    wandb.init(
-                project=configs["wandb_project"],
-                entity=configs["wandb_entity"],
-                resume='allow'
-            )
+    
+    if configs['wandb']:
+        wandb.init(
+                    project=configs["wandb_project"],
+                    entity=configs["wandb_entity"],
+                    config=configs,
+                    resume='allow'
+                )
 
     criterion = nn.BCEWithLogitsLoss()
     if configs['ssl_encoder'] is None:
@@ -83,6 +85,8 @@ def train(configs):
             
             #Store checkpoint
             torch.save(base_model,os.path.join(configs['checkpoint_path'],'best_model.pt'))
+    
+    test(configs,phase='test')
 
 def test(configs,phase,model=None, loader = None, criterion = None,epoch='Test'):
     
@@ -90,8 +94,6 @@ def test(configs,phase,model=None, loader = None, criterion = None,epoch='Test')
         print('='*20)
         print('Begin Testing')
         print('='*20)
-        checkpoint_path = utils.create_checkpoint_directory(configs)
-        configs['checkpoint_path'] = checkpoint_path
         _, _, loader = utils.prepare_supervised_learning_loaders(configs)
         criterion = nn.BCEWithLogitsLoss()
 
