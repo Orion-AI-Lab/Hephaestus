@@ -29,7 +29,7 @@ from torchvision.transforms import (
     ToTensor,
 )
 
-import Dataset
+import dataset.Dataset as Dataset
 from self_supervised.mocov2 import builder
 from utilities.utils import prepare_configuration, is_distributed, is_global_master, world_info_from_env, save_checkpoint, load_checkpoint, AverageMeter, ProgressMeter, adjust_learning_rate, accuracy
 

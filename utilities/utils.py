@@ -10,7 +10,7 @@ import torch.distributed as dist
 import torch.nn as nn
 from torchmetrics import Accuracy, F1Score, JaccardIndex, Precision, Recall
 
-import Dataset
+import dataset.Dataset as Dataset
 import self_supervised.mocov2.builder as builder
 
 
