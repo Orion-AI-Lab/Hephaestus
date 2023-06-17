@@ -51,6 +51,13 @@ def train(configs):
     metrics = utils.initialize_metrics(configs)
     checkpoint_path = utils.create_checkpoint_directory(configs)
     configs['checkpoint_path'] = checkpoint_path
+
+    wandb.init(
+                project=configs["wandb_project"],
+                entity=configs["wandb_entity"],
+                resume=True
+            )
+
     criterion = nn.BCEWithLogitsLoss()
     if configs['ssl_encoder'] is None:
         base_model = model_utils.create_model(configs)
