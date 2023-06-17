@@ -8,3 +8,4 @@ kornia==0.6.9
 wandb==0.13.7
 einops
 torchmetrics
+webdataset
