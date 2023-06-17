@@ -220,6 +220,10 @@ class SupervisedDataset(torch.utils.data.Dataset):
 
 
 class FullFrameDataset(torch.utils.data.Dataset):
+    '''
+        Dataloader returning the full InSAR frame.
+        Returns InSAR + Coherence , labels.
+    '''
     def __init__(self, config, mode="train"):
         self.data_path = config["data_path"]
         self.config = config
@@ -230,7 +234,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
             self.augmentations = None
 
         self.interferograms = []
-        self.channels = config["num_channels"]
+        self.channels = config["num_channel"]
         annotation_path = config['annotation_path']
         annotations = os.listdir(annotation_path)
         frames = os.listdir(self.data_path)
@@ -254,6 +258,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
                 label = 0
             else:
                 label = 1
+
             sample_dict = {
                 "frameID": annotation["frameID"],
                 "insar_path": annotation_utils.get_insar_path(
@@ -267,8 +272,12 @@ class FullFrameDataset(torch.utils.data.Dataset):
                 self.negatives.append(sample_dict)
             else:
                 self.positives.append(sample_dict)
+
+
         random.Random(999).shuffle(self.positives)
         random.Random(999).shuffle(self.negatives)
+
+
         if self.mode=='train':
             self.positives = self.positives[:int(0.9*len(self.positives))]
             self.negatives = self.negatives[:int(0.9*len(self.negatives))]
@@ -309,14 +318,12 @@ class FullFrameDataset(torch.utils.data.Dataset):
         if coherence is None:
             print('Coherence None')
             return coherence, 0
-        rsz = A.augmentations.Resize(height=224,width=224)
+        rsz = A.augmentations.Resize(height=self.config['image_size'],width=self.config['image_size'])
         transform = rsz(image =insar)
         insar = transform['image']
         transform = rsz(image =coherence)
         coherence = transform['image']
         insar = np.asarray([insar,coherence])
-
-        #insar = einops.rearrange([insar, coherence], 'c h w -> c h w')
 
         if insar is None:
             print("None")
@@ -324,6 +331,41 @@ class FullFrameDataset(torch.utils.data.Dataset):
 
         insar = self.prepare_insar(insar)
         return insar, 0
+
+    def create_label_vector(self,annotation):
+        #Labels:
+        #    - Deformation, No Deformation
+        #    --- Deformation Type: Mogi, Dyke, Sill, Earthquake
+        #    --- Deformation Intensity
+        label = np.zeros((11,))
+        if 'Non Deformation' in annotation['label']:
+            label[1] = 1
+            return label 
+        else:
+            label[0] = 1
+            # Check activity type. It's possible to have more than one
+            if 'Mogi' in annotation['activity_type']:
+                label[2] = 1
+            if 'Dyke' in annotation['activity_type']:
+                label[3] = 1
+            if 'Sill' in annotation['activity_type']:
+                label[4] = 1
+            if 'Spheroid' in annotation['activity_type']:
+                label[5] = 1
+            if 'Earthquake' in annotation['activity_type']:
+                label[6] = 1
+            if 'Unidentified' in annotation['activity_type']:
+                label[7] = 1
+            
+            # Check event intensity
+            if 'Low' in annotation['intensity_level']:
+                label[8] = 1
+            if 'Medium' in annotation['intensity_level']:
+                label[9] = 1
+            if 'High' in annotation['intensity_level']:
+                label[10] = 1
+        
+        return label
 
     def __getitem__(self, index):
         insar = None
@@ -350,8 +392,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
                     else:
                         index = 0
         annotation = sample["label"]
-        if "Non_Deformation" in annotation["label"]:
-            label = 0
-        else:
-            label = 1
-        return insar, torch.tensor(label).long()
+        
+        label = self.create_label_vector(annotation)
+
+        return insar, torch.tensor(label).float()
