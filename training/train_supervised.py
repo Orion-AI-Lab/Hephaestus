@@ -13,7 +13,8 @@ from models import model_utils
 
 
 def train_epoch(train_loader,model,optimizer,criterion,epoch,configs):
-    model.train()
+    if not configs['linear_evaluation']:
+        model.train()
 
     for idx, batch in enumerate(tqdm.tqdm(train_loader)):
         
@@ -63,8 +64,30 @@ def train(configs):
     criterion = nn.BCEWithLogitsLoss()
     if configs['ssl_encoder'] is None:
         base_model = model_utils.create_model(configs)
+        if 'vit' in configs['architecture']:
+            in_features = base_model.head.in_features
+        else:
+            in_features = base_model.fc.in_features
     else:
+        print('Loading SSL checkpoint: ',configs['ssl_encoder'])
         base_model = torch.load(configs['ssl_encoder'],map_location='cpu')
+        #Create dummy model to get fully connected layer's input dim
+        dummy_model = model_utils.create_model(configs)
+        if 'vit' in configs['architecture']:
+            in_features = dummy_model.head.in_features
+        else:
+            in_features = dummy_model.fc.in_features
+        del dummy_model
+    
+    if configs['linear_evaluation']:
+        for param in base_model.parameters():
+            param.requires_grad = False
+        if 'vit' not in configs['architecture']:
+            base_model.fc = nn.Linear(in_features,configs['num_classes'])
+        else:
+            base_model.head = nn.Linear(in_features,configs['num_classes'])
+    
+        base_model.eval()
 
     optimizer = torch.optim.AdamW(base_model.parameters(),lr=configs['lr'],weight_decay=configs['weight_decay'])
     
