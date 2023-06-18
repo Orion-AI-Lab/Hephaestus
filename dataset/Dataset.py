@@ -293,6 +293,8 @@ class FullFrameDataset(torch.utils.data.Dataset):
             self.num_examples = len(self.interferograms)
 
         print('Mode: ',self.mode,' Number of examples: ',self.num_examples)
+        print('Number of positives: ',len(self.positives))
+        print('Number of negatives: ',len(self.negatives))
 
     def __len__(self):
         return self.num_examples
