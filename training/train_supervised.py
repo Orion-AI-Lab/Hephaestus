@@ -11,6 +11,7 @@ import utilities.utils as utils
 import wandb
 from models import model_utils
 
+class_dict = {0:'Deformation', 1: 'Non Deformation', 2:'Mogi', 3: 'Dyke', 4: 'Sill', 5: 'Spheroid', 6:'Earthquake',7: 'Unidentified', 8: 'Low', 9:'Medium', 10:'High'}
 
 def train_epoch(train_loader,model,optimizer,criterion,epoch,configs):
     if not configs['linear_evaluation']:
@@ -182,7 +183,7 @@ def test(configs,phase,model=None, loader = None, criterion = None,epoch='Test')
             if phase!='val':
                 scores = metric.compute()
                 for idx in range(scores.shape[0]):
-                    log_dict[phase + ' ' + metric.__class__.__name__ + ' Class: ' + str(idx)] = scores[idx]
+                    log_dict[phase + ' ' + metric.__class__.__name__ + ' Class: ' + class_dict[idx]] = scores[idx]
 
     if configs['wandb']:
         wandb.log(log_dict)
