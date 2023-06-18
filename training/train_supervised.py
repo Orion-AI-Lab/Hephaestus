@@ -78,7 +78,14 @@ def train(configs):
         else:
             in_features = dummy_model.fc.in_features
         del dummy_model
-    
+
+        #Load ssl configs for logging
+        if configs['wandb']:
+            ssl_configs = json.load(open(configs['ssl_config_path'],'r'))
+            for key, value in ssl_configs.items():
+                configs['SSL_'+key] = value
+            wandb.config.update(configs)
+            
     if configs['linear_evaluation']:
         for param in base_model.parameters():
             param.requires_grad = False

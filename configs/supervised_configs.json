@@ -3,9 +3,10 @@
     "wandb_entity":"YOUR_ENTITY",
     "task":"classification",
     "num_classes":11,
-    "wandb":false,
+    "wandb":true,
     "mixed_precision":true,
     "ssl_encoder":null,
+    "ssl_config_path":null,
     "annotation_path":"YOUR_PATH/annotations/",
     "data_path":"YOUR_PATH/Hephaestus_Raw/",
     "batch_size":128,
@@ -13,13 +14,13 @@
     "device":"cuda:1",
     "lr":0.0001,
     "weight_decay":1e-4,
-    "epochs":1,
-    "architecture":"ResNet18",
+    "epochs":10,
+    "architecture":"ResNet50",
     "oversampling":true,
     "multilabel":true,
     "linear_evaluation":false,
     "augment":false,
     "num_channel":2,
     "image_size":224,
-    "test_frames": ["124D_04854_171313", "022D_04826_121209", "087D_07004_060904","174A_09133_131313","021D_09150_131313","109D_05390_141615", "162A_06192_060402", "076D_09725_121107","115D_04999_131313","152D_08915_131313", "164A_13146_131313"] // Volcanoes in Campi Flegrei (Italy), Kilauea (Hawaii), Mauna Loa (Hawaii), Puu Ooo (Hawaii), and NNyiragongo (Congo), Santorini (Greece), Caldera de los Marteles (Spain/Africa), Merapi (Indonesia), Korosi (Kenya), Silali (Kenya), Cerro Tronador (Chile), Osorno (Chile), Puyehue (Chile)
+    "test_frames": ["124D_04854_171313", "022D_04826_121209", "087D_07004_060904","174A_09133_131313","021D_09150_131313","109D_05390_141615", "162A_06192_060402", "076D_09725_121107","115D_04999_131313","152D_08915_131313", "164A_13146_131313","151D_SM_REUN_S4","144A_SM_REUN_S6"] // Volcanoes in Campi Flegrei (Italy), Kilauea (Hawaii), Mauna Loa (Hawaii), Puu Ooo (Hawaii), Nyiragongo (Congo), Santorini (Greece), Caldera de los Marteles (Spain/Africa), Merapi (Indonesia), Korosi (Kenya), Silali (Kenya), Cerro Tronador (Chile), Osorno (Chile), Puyehue (Chile), La Soufriere (Carribean)
 }
