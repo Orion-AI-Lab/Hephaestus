@@ -238,7 +238,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
         annotations = os.listdir(annotation_path)
         frames = os.listdir(self.data_path)
         unique_frames = np.unique(frames)
-        test_frames = ["124D_04854_171313", "022D_04826_121209", "087D_07004_060904"]
+        test_frames = self.config['test_frames']
 
         self.frame_dict = {}
         for idx, frame in enumerate(unique_frames):
