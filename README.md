@@ -18,39 +18,17 @@ If you use this work, please cite:
     pages     = {1453-1462}
 }
 ```
+
+### Contents
+- [Setup](#dependancies)
+- [Data and pretrained models](#dataset-and-pretrained-models)
+- [SSL Training from scratch](#train-ssl-from-scratch)
+- [Description of Hephaestus annotation scheme](#annotation)
+- [Recreating cropped dataset](#reproduce-cropped-patches)
+- [Acknowledgment](#acknowledgments)
 ### Dependancies
 This repo has been tested with python3.9. To install the necessary dependancies run:   
 `pip install -r requirements.txt`
-
-### Multi-GPU / Multi-Node training
-You can make use of torchrun or SLURM to launch distributed jobs.
-
-#### torchrun: 
-Single-Node Multi-GPU:
-```
-torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py
-```
-
-Multi-Node Multi-GPU:
-```
-# On XXX.XXX.XXX.62 (the master node)
-torchrun \
---nproc_per_node=2 --nnodes=2 --node_rank=0 \
---master_addr=XXX.XXX.XXX.62 --master_port=1234 \
-main.py
-
-# On XXX.XXX.XXX.63 (the worker node)
-torchrun \
---nproc_per_node=2 --nnodes=2 --node_rank=1 \
---master_addr=XXX.XXX.XXX.62 --master_port=1234 \
-main.py
-```
-
-#### SLURM:
-After setting the relevant parameters inside hephaestus.slurm:
-```
-sbatch hephaestus.slurm
-```
 
 ### Dataset and pretrained models
 
@@ -99,6 +77,37 @@ To initiate the training procedure run:
 python main.py
 ```
 The script will automatically create folders for the checkpoints and store the config file and the wandb run id.
+
+
+### Multi-GPU / Multi-Node training
+You can make use of torchrun or SLURM to launch distributed jobs.
+
+#### torchrun: 
+Single-Node Multi-GPU:
+```
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py
+```
+
+Multi-Node Multi-GPU:
+```
+# On XXX.XXX.XXX.62 (the master node)
+torchrun \
+--nproc_per_node=2 --nnodes=2 --node_rank=0 \
+--master_addr=XXX.XXX.XXX.62 --master_port=1234 \
+main.py
+
+# On XXX.XXX.XXX.63 (the worker node)
+torchrun \
+--nproc_per_node=2 --nnodes=2 --node_rank=1 \
+--master_addr=XXX.XXX.XXX.62 --master_port=1234 \
+main.py
+```
+
+#### SLURM:
+After setting the relevant parameters inside hephaestus.slurm:
+```
+sbatch hephaestus.slurm
+```
 
 ### Annotation
 
