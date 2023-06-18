@@ -79,6 +79,11 @@ def train(configs):
             in_features = dummy_model.fc.in_features
         del dummy_model
 
+        if not configs['linear_evaluation']:
+            if 'vit' not in configs['architecture']:
+                base_model.fc = nn.Linear(in_features,configs['num_classes'])
+            else:
+                base_model.head = nn.Linear(in_features,configs['num_classes'])
         #Load ssl configs for logging
         if configs['wandb']:
             ssl_configs = json.load(open(configs['ssl_config_path'],'r'))
