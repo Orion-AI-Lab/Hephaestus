@@ -13,6 +13,7 @@ import random
 import einops
 import torchvision
 import albumentations as A
+
 np.random.seed(999)
 torch.manual_seed(999)
 random.seed(999)
@@ -257,13 +258,15 @@ class FullFrameDataset(torch.utils.data.Dataset):
                 label = 0
             else:
                 label = 1
-
+            sample_insar_path = annotation_utils.get_insar_path(
+                    annotation_path=annotation_path + annotation_file,
+                    root_path=self.config["data_path"])
+            sample_cc_path = sample_insar_path[:-8] + 'cc.png'
+            if not os.path.isfile(sample_cc_path) or not os.path.isfile(sample_insar_path):
+                continue
             sample_dict = {
                 "frameID": annotation["frameID"],
-                "insar_path": annotation_utils.get_insar_path(
-                    annotation_path=annotation_path + annotation_file,
-                    root_path=self.config["data_path"],
-                ),
+                "insar_path":sample_insar_path,
                 "label": annotation,
             }
             self.interferograms.append(sample_dict)

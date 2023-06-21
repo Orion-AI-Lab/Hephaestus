@@ -194,7 +194,6 @@ def load_checkpoint(model, optimizer, args):
 def extract_state_dict_from_ddp_checkpoint(checkpoint_path):
     print("=> loading checkpoint '{}'".format(checkpoint_path))
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
-    print(checkpoint.keys())
     encoder_state_dict = {}
     for key in list(checkpoint["state_dict"].keys()):
         checkpoint["state_dict"][key.replace("module.", "")] = checkpoint[
