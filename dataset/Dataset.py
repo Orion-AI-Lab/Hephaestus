@@ -339,7 +339,7 @@ class FullFrameDataset(torch.utils.data.Dataset):
         #    --- Deformation Type: Mogi, Dyke, Sill, Earthquake
         #    --- Deformation Intensity
         label = np.zeros((11,))
-        if 'Non Deformation' in annotation['label']:
+        if 'Non_Deformation' in annotation['label']:
             label[1] = 1
             return label 
         else:
