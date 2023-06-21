@@ -16,7 +16,7 @@ if __name__ == "__main__":
         config_path = "configs/supervised_configs.json"
         configs = json.load(open(config_path,'r'))
         if args.ssl_encoder_path is not None and args.ssl_config_path is not None:
-            configs['ssl_encder'] = args.ssl_encoder_path
+            configs['ssl_encoder'] = args.ssl_encoder_path
             configs['ssl_config_path'] = args.ssl_config_path
         print('Initializing supervised training with configs: ')
         pprint.pprint(configs)

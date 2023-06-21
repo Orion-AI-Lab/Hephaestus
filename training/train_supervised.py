@@ -71,14 +71,16 @@ def train(configs):
             in_features = base_model.fc.in_features
     else:
         print('Loading SSL checkpoint: ',configs['ssl_encoder'])
-        base_model = torch.load(configs['ssl_encoder'],map_location='cpu')
         #Create dummy model to get fully connected layer's input dim
-        dummy_model = model_utils.create_model(configs)
+        base_model = model_utils.create_model(configs)
+        
         if 'vit' in configs['architecture']:
-            in_features = dummy_model.head.in_features
+            in_features = base_model.head.in_features
         else:
-            in_features = dummy_model.fc.in_features
-        del dummy_model
+            in_features = base_model.fc.in_features
+
+        base_model.fc = nn.Identity()
+        base_model.load_state_dict(utils.extract_state_dict_from_ddp_checkpoint(configs['ssl_encoder']))
 
         if not configs['linear_evaluation']:
             if 'vit' not in configs['architecture']:

@@ -119,15 +119,15 @@ def prepare_supervised_learning_loaders(configs):
 
 def initialize_metrics(configs):
     if configs['multilabel']:
-        accuracy = Accuracy(task='multilabel', average='micro',multidim_average='global',num_labels=configs['num_classes']).to(configs['device'])
-        fscore = F1Score(task='multilabel', num_labels=configs['num_classes'],average='micro',multidim_average='global').to(configs['device'])
-        precision = Precision(task='multilabel', average='micro', num_labels=configs['num_classes'],multidim_average='global').to(configs['device'])
-        recall = Recall(task='multilabel', average='micro', num_labels=configs['num_classes'],multidim_average='global').to(configs['device'])
+        accuracy = Accuracy(task='multilabel', average=configs['metric_strategy'],multidim_average='global',num_labels=configs['num_classes']).to(configs['device'])
+        fscore = F1Score(task='multilabel', num_labels=configs['num_classes'],average=configs['metric_strategy'],multidim_average='global').to(configs['device'])
+        precision = Precision(task='multilabel', average=configs['metric_strategy'], num_labels=configs['num_classes'],multidim_average='global').to(configs['device'])
+        recall = Recall(task='multilabel', average=configs['metric_strategy'], num_labels=configs['num_classes'],multidim_average='global').to(configs['device'])
     else:
-        accuracy = Accuracy(task='multiclass', average='micro',multidim_average='global',num_classes=configs['num_classes']).to(configs['device'])
-        fscore = F1Score(task='multiclass', num_classes=configs['num_classes'],average='micro',multidim_average='global').to(configs['device'])
-        precision = Precision(task='multiclass', average='micro', num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
-        recall = Recall(task='multiclass', average='micro', num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
+        accuracy = Accuracy(task='multiclass', average=configs['metric_strategy'],multidim_average='global',num_classes=configs['num_classes']).to(configs['device'])
+        fscore = F1Score(task='multiclass', num_classes=configs['num_classes'],average=configs['metric_strategy'],multidim_average='global').to(configs['device'])
+        precision = Precision(task='multiclass', average=configs['metric_strategy'], num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
+        recall = Recall(task='multiclass', average=configs['metric_strategy'], num_classes=configs['num_classes'],multidim_average='global').to(configs['device'])
     return [accuracy, fscore, precision, recall]
 
 
@@ -190,6 +190,23 @@ def load_checkpoint(model, optimizer, args):
     else:
         print("=> no checkpoint found at '{}'".format(args["resume_checkpoint"]))
 
+
+def extract_state_dict_from_ddp_checkpoint(checkpoint_path):
+    print("=> loading checkpoint '{}'".format(checkpoint_path))
+    checkpoint = torch.load(checkpoint_path, map_location="cpu")
+    print(checkpoint.keys())
+    encoder_state_dict = {}
+    for key in list(checkpoint["state_dict"].keys()):
+        checkpoint["state_dict"][key.replace("module.", "")] = checkpoint[
+            "state_dict"
+        ][key]
+
+        del checkpoint["state_dict"][key]
+        if 'encoder_q' in key and 'fc' not in key:
+            encoder_state_dict[key.replace("module.encoder_q.","")] = checkpoint['state_dict'][key.replace("module.","")]
+
+    return encoder_state_dict
+    
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
