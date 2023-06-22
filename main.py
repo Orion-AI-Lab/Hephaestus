@@ -10,6 +10,8 @@ if __name__ == "__main__":
     parser.add_argument('--supervised', action='store', type=bool, default=True)
     parser.add_argument('--ssl_encoder_path', action='store', type=str, default=None)
     parser.add_argument('--ssl_config_path', action='store', type=str, default=None)
+    parser.add_argument('--supervised_img_size', action='store', type=int, default=224)
+
 
     args = parser.parse_args()
     if args.supervised:
@@ -18,6 +20,7 @@ if __name__ == "__main__":
         if args.ssl_encoder_path is not None and args.ssl_config_path is not None:
             configs['ssl_encoder'] = args.ssl_encoder_path
             configs['ssl_config_path'] = args.ssl_config_path
+            configs['image_size'] = args.supervised_img_size
         print('Initializing supervised training with configs: ')
         pprint.pprint(configs)
         train_supervised.train(configs)
