@@ -2,7 +2,6 @@
 if [ -z "$1" ]; then
   echo "No root path. Setting up default!"
   checkpoint_root_path="/mnt/shared_storage/hephaestus_checkpoints"
-  exit 1
 fi
 checkpoint_root_path=$1
 checkpoints=($(ls $checkpoint_root_path))
