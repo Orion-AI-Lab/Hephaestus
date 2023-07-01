@@ -1,9 +1,11 @@
 import pyjson5 as json
 from self_supervised.mocov2 import builder
+from self_supervised.mae import mae_model
 from utilities.utils import prepare_configuration
-from training import train_ssl, train_supervised
+from training import train_contrastive, train_supervised
 import argparse
 import pprint
+import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -39,7 +41,10 @@ if __name__ == "__main__":
                 config["moco_t"],
                 config["mlp"],
             )
+        elif config['method'] == "mae":
+            raise NotImplementedError(f'{config["method"]} is not supported.')
+
         else:
             raise NotImplementedError(f'{config["method"]} is not supported.')
 
-        train_ssl.exec_model(model, config)
+        train_contrastive.exec_model(model, config)

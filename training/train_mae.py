@@ -20,6 +20,8 @@ import torch.utils.data.distributed
 import torchvision.transforms.functional as F
 import wandb
 import webdataset as wds
+import mae_utils as misc
+import mae_scheduler as lr_sched
 from torchvision.transforms import (
     Compose,
     Grayscale,
@@ -28,69 +30,64 @@ from torchvision.transforms import (
     Resize,
     ToTensor,
 )
-
+import sys
 import dataset.Dataset as Dataset
 from self_supervised.mocov2 import builder
 from utilities.utils import prepare_configuration, is_distributed, is_global_master, world_info_from_env, save_checkpoint, load_checkpoint, AverageMeter, ProgressMeter, adjust_learning_rate, accuracy
 
 
-def train(train_loader, model, criterion, optimizer, epoch, args):
+def train(train_loader, model, criterion, optimizer, epoch, args,loss_scaler):
     print("Training epoch: ", epoch)
-    batch_time = AverageMeter("Time", ":6.3f")
-    data_time = AverageMeter("Data", ":6.3f")
-    losses = AverageMeter("Loss", ":.4e")
-    top1 = AverageMeter("Acc@1", ":6.2f")
-    top5 = AverageMeter("Acc@5", ":6.2f")
-    progress = ProgressMeter(
-        args["num_batches"],
-        [batch_time, data_time, losses, top1, top5],
-        prefix="Epoch: [{}]".format(epoch),
-    )
-
+    metric_logger = misc.MetricLogger(delimiter="  ")
+    metric_logger.add_meter('lr', misc.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    header = 'Epoch: [{}]'.format(epoch)
     # switch to train mode
     model.train()
-
+    accum_iter = args['accum_iter']
     end = time.time()
-    for i, (img1, img2) in enumerate(train_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
-
+    for i, (img1, _) in enumerate(train_loader):
+        
+        # we use a per iteration (instead of per epoch) lr scheduler
+        if i % accum_iter == 0:
+            lr_sched.adjust_learning_rate(optimizer, i / len(train_loader) + epoch, args)
         img1 = img1.cuda(non_blocking=True)
-        img2 = img2.cuda(non_blocking=True)
 
-        # compute output
-        output, target = model(im_q=img1, im_k=img2)
-        loss = criterion(output, target)
+        with torch.cuda.amp.autocast():
+            loss, _, _ = model(img1, mask_ratio=args['mask_ratio'])
 
-        # acc1/acc5 are (K+1)-way contrast classifier accuracy
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), img1.size(0))
-        top1.update(acc1[0], img1.size(0))
-        top5.update(acc5[0], img1.size(0))
+        loss_value = loss.item()
 
-        # compute gradient and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        if not math.isfinite(loss_value):
+            print("Loss is {}, stopping training".format(loss_value))
+            sys.exit(1)
 
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
+        loss /= accum_iter
+        loss_scaler(loss, optimizer, parameters=model.parameters(),
+                    update_grad=(i + 1) % accum_iter == 0)
+        if (i + 1) % accum_iter == 0:
+            optimizer.zero_grad()
 
-        if i % args["print_frequency"] == 0:
-            progress.display(i)
-            if is_global_master(args):
-                wandb.log(
-                    {
-                        "top1": top1.avg,
-                        "top5": top5.avg,
-                        "loss": loss.item(),
-                        "epoch": epoch,
-                        "iteration": i,
-                    }
-                )
+        torch.cuda.synchronize()
 
+        metric_logger.update(loss=loss_value)
+
+        lr = optimizer.param_groups[0]["lr"]
+        metric_logger.update(lr=lr)
+
+        loss_value_reduce = misc.all_reduce_mean(loss_value)
+        if (i + 1) % accum_iter == 0:
+            """ We use epoch_1000x as the x-axis in tensorboard.
+            This calibrates different curves when batch size changes.
+            """
+            epoch_1000x = int((i / len(train_loader) + epoch) * 1000)
+            #log_writer.add_scalar('train_loss', loss_value_reduce, epoch_1000x)
+            #log_writer.add_scalar('lr', lr, epoch_1000x)
+            wandb.log({'train_loss':loss_value_reduce,'lr':lr,'epoch':epoch_1000x})
+
+    # gather the stats from all processes
+    metric_logger.synchronize_between_processes()
+    print("Averaged stats:", metric_logger)
+    return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 
 def exec_model(model, args):
@@ -162,15 +159,15 @@ def exec_model(model, args):
             json.dump({"wandb_id": id}, open(args["checkpoint_path"] + "/id.json", "w"))
         wandb.watch(model)
 
-    print("=> creating model '{}'".format(config["architecture"]))
+    print("=> creating model '{}'".format(args["architecture"]))
     print(model)
 
     model.cuda()
     optimizer = torch.optim.SGD(
         model.parameters(),
-        config["lr"],
-        momentum=config["momentum"],
-        weight_decay=config["weight_decay"],
+        args["lr"],
+        momentum=args["momentum"],
+        weight_decay=args["weight_decay"],
     )
 
     if args["resume_checkpoint"]:
