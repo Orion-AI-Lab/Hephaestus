@@ -341,33 +341,33 @@ class FullFrameDataset(torch.utils.data.Dataset):
         #    - Deformation, No Deformation
         #    --- Deformation Type: Mogi, Dyke, Sill, Earthquake
         #    --- Deformation Intensity
-        label = np.zeros((11,))
+        label = np.zeros((10,))
         if 'Non_Deformation' in annotation['label']:
-            label[1] = 1
+            label[0] = 0
             return label 
         else:
             label[0] = 1
             # Check activity type. It's possible to have more than one
             if 'Mogi' in annotation['activity_type']:
-                label[2] = 1
+                label[1] = 1
             if 'Dyke' in annotation['activity_type']:
-                label[3] = 1
+                label[2] = 1
             if 'Sill' in annotation['activity_type']:
-                label[4] = 1
+                label[3] = 1
             if 'Spheroid' in annotation['activity_type']:
-                label[5] = 1
+                label[4] = 1
             if 'Earthquake' in annotation['activity_type']:
-                label[6] = 1
+                label[5] = 1
             if 'Unidentified' in annotation['activity_type']:
-                label[7] = 1
+                label[6] = 1
             
             # Check event intensity
             if 'Low' in annotation['intensity_level']:
-                label[8] = 1
+                label[7] = 1
             if 'Medium' in annotation['intensity_level']:
-                label[9] = 1
+                label[8] = 1
             if 'High' in annotation['intensity_level']:
-                label[10] = 1
+                label[9] = 1
         
         return label
 
